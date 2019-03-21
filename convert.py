@@ -96,13 +96,13 @@ def results(ihl_array, filename):
         result.write("Total number of localUsers from %s in total: %d \n \n" % (ihl_array[ihl].name, ihl_array[ihl].localUsers))
         result.write("Total number of visitors to %s : %d \n \n" % (ihl_array[ihl].name, ihl_array[ihl].visitors))
     for ihl in ihl_array:
-        result.write("Total number of unique users this month to %s : %d \n" % (ihl_array[ihl].name, ihl_array[ihl].getUniqueCountMonth()))
-        result.write("Total number of rejectUnique users this month to %s : %d \n" % (ihl_array[ihl].name, ihl_array[ihl].getRejectUniqueCountMonth()))
-        result.write("Total number of unique users this year to %s : %d \n" % (ihl_array[ihl].name, ihl_array[ihl].getUniqueCountYear()))
-        result.write("Total number of rejectUnique users this year to %s : %d \n\n" % (ihl_array[ihl].name, ihl_array[ihl].getRejectUniqueCountYear()))
+        result.write("Total number of unique users this month to %s : %d \n" % (ihl_array[ihl].name, ihl_array[ihl].get_unique_count_month()))
+        result.write("Total number of rejectUnique users this month to %s : %d \n" % (ihl_array[ihl].name, ihl_array[ihl].get_reject_unique_count_month()))
+        result.write("Total number of unique users this year to %s : %d \n" % (ihl_array[ihl].name, ihl_array[ihl].get_unique_count_year()))
+        result.write("Total number of rejectUnique users this year to %s : %d \n\n" % (ihl_array[ihl].name, ihl_array[ihl].get_reject_unique_count_year()))
     
     for ihl in ihl_array:
-        result.write("Total number of rejected from %s for the day: %d \n" % (ihl_array[ihl].name, ihl_array[ihl].getRejectCount()))
+        result.write("Total number of rejected from %s for the day: %d \n" % (ihl_array[ihl].name, ihl_array[ihl].get_reject_count()))
     result.close()
     print('Results.txt closed')
 
@@ -148,16 +148,16 @@ def save_csv(ihl_array, filename, interval, previous_date):
             for ihl in ihl_array:
                 csv_list.append([date, ihl_array[ihl].name, ihl_array[ihl].localUsers, "LocalUsers"])
                 csv_list.append([date, ihl_array[ihl].name, ihl_array[ihl].visitors, "Visitors"])
-                csv_list.append([date, ihl_array[ihl].name, ihl_array[ihl].getRejectCount(), "Rejected"])
+                csv_list.append([date, ihl_array[ihl].name, ihl_array[ihl].get_reject_count(), "Rejected"])
         if interval == 'Month':
             # Check for duplicate month entry and delete
             if not(month_words != last_checked and last_checked=='Month'):
                 # Filter away the entries where the first element is the current month
                 csv_list = [row for row in csv_list if month_words not in row]
             for ihl in ihl_array:
-                csv_list.append([month_words, ihl_array[ihl].name, ihl_array[ihl].getUniqueCountMonth(),
+                csv_list.append([month_words, ihl_array[ihl].name, ihl_array[ihl].get_unique_count_month(),
                                  "Accepted"])
-                csv_list.append([month_words, ihl_array[ihl].name, ihl_array[ihl].getRejectUniqueCountMonth(),
+                csv_list.append([month_words, ihl_array[ihl].name, ihl_array[ihl].get_reject_unique_count_month(),
                                  "Rejected"])
         if interval == 'Year':
             # Check for duplicate year entry and delete
@@ -165,8 +165,8 @@ def save_csv(ihl_array, filename, interval, previous_date):
                 # Filter away the entries where the first element is the current year
                 csv_list = [row for row in csv_list if year not in row]
             for ihl in ihl_array:
-                csv_list.append([year, ihl_array[ihl].name, ihl_array[ihl].getUniqueCountYear(), "Accepted"])
-                csv_list.append([year, ihl_array[ihl].name, ihl_array[ihl].getRejectUniqueCountYear(), "Rejected"])
+                csv_list.append([year, ihl_array[ihl].name, ihl_array[ihl].get_unique_count_year(), "Accepted"])
+                csv_list.append([year, ihl_array[ihl].name, ihl_array[ihl].get_reject_unique_count_year(), "Rejected"])
         csv_list = [row for row in csv_list if row != []]
         # Then write back to csv file
         with open(filename+'.csv', 'w') as csv_file:
@@ -182,8 +182,8 @@ def main():
     """
     # Since datetime is a built-in module, can just use its properties to get previous day's date.
     # Comment the previous_date below when you use batchfile sys.argv
-    previous_date = datetime.date.today() - datetime.timedelta(1)
-    # previous_date = datetime.date(day=1, month=6, year=2015)
+    #previous_date = datetime.date.today() - datetime.timedelta(1)
+    previous_date = datetime.date(day=3, month=2, year=2019)
     
     # uncomment !SS! below for use with batchfile only. Example arg: 021215 ###
     # !SS!log_file = open("/home/eduroam_stat/old-stat/radsecproxy.log_"+str(sys.argv[1]),"r")
@@ -218,7 +218,7 @@ def main():
             ihl_array[ihl] = IHL(ihl.upper(), config[ihl]['ip'], config[ihl]['server'])
     # Read UniqueUsers Files for all the IHLs
     for ihl in ihl_array:
-        ihl_array[ihl].readUniqueUserFiles(month,year_2numbers)
+        ihl_array[ihl].read_unique_user_files(month, year_2numbers)
     print("Finished adding users from each uniqueUser file for each IHL")
     # Initialise localUsers from ihl at other places and logExtract variables
     for ihl in ihl_array:
@@ -232,7 +232,7 @@ def main():
 
     # 3. Writing back to uniqueUserFiles
     for ihl in ihl_array:
-        ihl_array[ihl].writeUniqueUserFiles(month, year_2numbers)
+        ihl_array[ihl].write_unique_user_files(month, year_2numbers)
     print("Finished writing to each uniqueUser file for all the IHLs")
     
     # 4. Write to results file - Code logic at line 80
