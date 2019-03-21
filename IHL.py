@@ -25,14 +25,21 @@ class IHL:
 
     def read_unique_user_files(self, month, year):
         """ Open and read the unique user files associated with the IHL """
-        self.userRecordsMonth = set(self.read_file(self.filepath + "UniqueUsers" + self.name + ".log_" + month + year))
-        print("Opened %s monthly unique user file" % self.name)
-        self.userRecordsYear = set(self.read_file(self.filepath + "UniqueUsers" + self.name + ".log_" + year))
-        print("Opened %s yearly unique user file" % self.name)
-        self.rejectRecordsMonth = set(self.read_file(self.filepath + "rejectUniqueUsers" + self.name + ".log_" + month + year))
-        print("Opened %s monthly rejectunique user file" % self.name)
-        self.rejectRecordsYear = set(self.read_file(self.filepath + "rejectUniqueUsers" + self.name + ".log_" + year))
-        print("Opened %s yearly rejectunique user file" % self.name)
+        print("Opening {} monthly unique user file".format(self.name))
+        self.userRecordsMonth = set(self.read_file("{}{}-unique-users_{}_{}.log".format(self.filepath, self.name,
+                                                                                        month, year)))
+
+        print("Opening {} yearly unique user file".format(self.name))
+        self.userRecordsYear = set(self.read_file("{}{}-unique-users_{}.log".format(self.filepath, self.name, year)))
+
+        print("Opening {} monthly rejected unique user file".format(self.name))
+        self.rejectRecordsMonth = set(self.read_file("{}{}-rejected-unique-users_{}_{}.log".format(self.filepath,
+                                                                                                   self.name,
+                                                                                                   month, year)))
+
+        print("Opening {} yearly rejected unique user file".format(self.name))
+        self.rejectRecordsYear = set(self.read_file("{}{}-rejected-unique-users_{}.log".format(self.filepath,
+                                                                                               self.name, year)))
 
     @staticmethod
     def read_file(filename):
@@ -50,14 +57,20 @@ class IHL:
 
     def write_unique_user_files(self, month, year):
         """ Write all the associated unique users back to the unique user files"""
-        self.write_file(self.filepath + "UniqueUsers" + self.name + ".log_" + month + year, self.userRecordsMonth)
-        print("Written to %s monthly unique user file" % self.name)
-        self.write_file(self.filepath + "UniqueUsers" + self.name + ".log_" + year, self.userRecordsYear)
-        print("Written to %s yearly unique user file" % self.name)
-        self.write_file(self.filepath + "rejectUniqueUsers" + self.name + ".log_" + month + year, self.rejectRecordsMonth)
-        print("Written to %s monthly rejectunique user file" % self.name)
-        self.write_file(self.filepath + "rejectUniqueUsers" + self.name + ".log_" + year, self.rejectRecordsYear)
-        print("Written to %s yearly rejectunique user file" % self.name)
+        print("Writing to {} monthly unique user file".format(self.name))
+        self.write_file("{}{}-unique-users_{}_{}.log".format(self.filepath, self.name, month, year),
+                        self.userRecordsMonth)
+
+        print("Writing to %s yearly unique user file" % self.name)
+        self.write_file("{}{}-unique-users_{}.log".format(self.filepath, self.name, year), self.userRecordsYear)
+
+        print("Writing to {} monthly reject unique user file".format(self.name))
+        self.write_file("{}{}-rejected-unique-users_{}_{}.log".format(self.filepath, self.name, month, year),
+                        self.rejectRecordsMonth)
+
+        print("Writing to {} yearly reject unique user file".format(self.name))
+        self.write_file("{}{}-rejected-unique-users_{}.log".format(self.filepath, self.name, year),
+                        self.rejectRecordsYear)
 
     @staticmethod
     def write_file(file_name, user_records):

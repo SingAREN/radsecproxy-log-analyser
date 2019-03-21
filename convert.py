@@ -182,8 +182,8 @@ def main():
     """
     # Since datetime is a built-in module, can just use its properties to get previous day's date.
     # Comment the previous_date below when you use batchfile sys.argv
-    #previous_date = datetime.date.today() - datetime.timedelta(1)
-    previous_date = datetime.date(day=3, month=2, year=2019)
+    previous_date = datetime.date.today() - datetime.timedelta(1)
+    #previous_date = datetime.date(day=3, month=2, year=2019)
     
     # uncomment !SS! below for use with batchfile only. Example arg: 021215 ###
     # !SS!log_file = open("/home/eduroam_stat/old-stat/radsecproxy.log_"+str(sys.argv[1]),"r")
@@ -191,56 +191,52 @@ def main():
     # !SS!datestring=str(sys.argv[1])
     # !SS!previous_date = datetime.date(day=int(datestring[0:2]),month=int(datestring[2:4]),year=2000+int(datestring[4:6]))
 
-    day = previous_date.strftime('%d')
     month = previous_date.strftime('%m')
     month_words = previous_date.strftime('%b')
     year = previous_date.strftime('%Y')
-    year_2numbers = previous_date.strftime('%y')
     file_date = previous_date.strftime("%Y%m%d")
 
-    # Comment below when using batchfile, check the filepath before running- IMPORTANT!
-    log_file = open("./logs/radsecproxy.log-{}".format(file_date), "r")
-    print("Opening radsecproxy.log-{}".format(file_date))
-    
-    # Save all info from log file into a list of lines named log_data(for LogExtract)
-    log_data = log_file.readlines()
-    log_file.close()
     # Load config file from ihlconfig.json which contains details of the IHLs.
     config = json.load(open('./ihlconfig.json'))
+
     # Load Server name and IP Address for the Euro Top-Level RADIUS Servers
     etlr_server = config['etlr']['server']
     etlr_ip = config['etlr']['ip']
     
     # 1. Load the IHLs' details, their Unique Users file into unique Records
     ihl_array = dict()
-    for ihl in config:
-        if ihl != 'etlr':
-            ihl_array[ihl] = IHL(ihl.upper(), config[ihl]['ip'], config[ihl]['server'])
+    for institution in config:
+        if institution != 'etlr':
+            ihl_array[institution] = IHL(institution.upper(), config[institution]['ip'], config[institution]['server'])
+
     # Read UniqueUsers Files for all the IHLs
-    for ihl in ihl_array:
-        ihl_array[ihl].read_unique_user_files(month, year_2numbers)
+    for institution in ihl_array:
+        ihl_array[institution].read_unique_user_files(month, year)
     print("Finished adding users from each uniqueUser file for each IHL")
-    # Initialise localUsers from ihl at other places and logExtract variables
-    for ihl in ihl_array:
-        # 1 element for each ihl in the stats for the ihl's localUsersCount
+
+    # Initialise localUsers from institution at other places and logExtract variables
+    for institution in ihl_array:
+        # 1 element for each institution in the stats for the institution's localUsersCount
         for ihl_name in config:
-            ihl_array[ihl].localUsersCount[ihl_name] = 0
-        print("{}: {}".format(ihl_array[ihl].name, ihl_array[ihl].localUsersCount))
+            ihl_array[institution].localUsersCount[ihl_name] = 0
+        print("{}: {}".format(ihl_array[institution].name, ihl_array[institution].localUsersCount))
         
     # 2.Do Log Extract - Code logic at Line 8
-    log_extract(log_data, ihl_array, etlr_server, etlr_ip)
+    print("Opening radsecproxy.log-{}".format(file_date))
+    with open("./logs/radsecproxy.log-{}".format(file_date), "r") as log_data:
+        log_extract(log_data, ihl_array, etlr_server, etlr_ip)
 
     # 3. Writing back to uniqueUserFiles
-    for ihl in ihl_array:
-        ihl_array[ihl].write_unique_user_files(month, year_2numbers)
+    for institution in ihl_array:
+        ihl_array[institution].write_unique_user_files(month, year)
     print("Finished writing to each uniqueUser file for all the IHLs")
     
     # 4. Write to results file - Code logic at line 80
-    results(ihl_array, "Stats_results/results.log_"+day+month+year_2numbers)
+    results(ihl_array, "Stats_results/results.log_{}".format(file_date))
 
     # 5. Save to CSV files(Daily, Monthly, Yearly) - saveCSV(FileInterval) Code logic at line 106
-    save_csv(ihl_array, 'csv/Daily' + month_words + year, 'Day', previous_date)
-    save_csv(ihl_array, 'csv/Monthly' + year, 'Month', previous_date)
+    save_csv(ihl_array, 'csv/Daily{}{}'.format(month_words, year), 'Day', previous_date)
+    save_csv(ihl_array, 'csv/Monthly{}'.format(year), 'Month', previous_date)
     save_csv(ihl_array, 'csv/Yearly', 'Year', previous_date)
     print("Saved to CSV files!")
 
