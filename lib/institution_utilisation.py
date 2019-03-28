@@ -173,7 +173,7 @@ def save_csv(ihl_array, filename, interval, previous_date):
             writer.writerows(csv_list)
 
 
-def analysis(current_date):
+def analysis(ihl_config_file_path, current_date):
     """
     Defines the main conversion process. Instantiates the class IHL for each institute
     nd calls the other functions for processing.
@@ -196,7 +196,7 @@ def analysis(current_date):
     file_date = current_date.strftime("%Y%m%d")
 
     # Load config file from ihlconfig.json which contains details of the IHLs.
-    config = json.load(open('./ihlconfig.json'))
+    config = json.load(open(ihl_config_file_path))
 
     # Load Server name and IP Address for the Euro Top-Level RADIUS Servers
     etlr_server = config['etlr']['server']
