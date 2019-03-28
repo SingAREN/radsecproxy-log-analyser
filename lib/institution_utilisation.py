@@ -1,7 +1,6 @@
-import datetime
 import json
 import csv
-from IHL import *
+from lib.IHL import *
 
 
 def log_extract(log_data, ihl_array, euro_tlr_server, euro_tlr_ip):
@@ -174,30 +173,30 @@ def save_csv(ihl_array, filename, interval, previous_date):
             writer.writerows(csv_list)
 
 
-def main():
+def analysis(ihl_config_file_path, current_date):
     """
     Defines the main conversion process. Instantiates the class IHL for each institute
     nd calls the other functions for processing.
     :return:
     """
     # Since datetime is a built-in module, can just use its properties to get previous day's date.
-    # Comment the previous_date below when you use batchfile sys.argv
-    previous_date = datetime.date.today() - datetime.timedelta(1)
-    #previous_date = datetime.date(day=3, month=2, year=2019)
+    # Comment the current_date below when you use batchfile sys.argv
+    #current_date = datetime.date.today() - datetime.timedelta(1)
+    #current_date = datetime.date(day=3, month=2, year=2019)
     
     # uncomment !SS! below for use with batchfile only. Example arg: 021215 ###
     # !SS!log_file = open("/home/eduroam_stat/old-stat/radsecproxy.log_"+str(sys.argv[1]),"r")
     # !SS!print ("radsecproxy.log_"+str(sys.argv[1]))
     # !SS!datestring=str(sys.argv[1])
-    # !SS!previous_date = datetime.date(day=int(datestring[0:2]),month=int(datestring[2:4]),year=2000+int(datestring[4:6]))
+    # !SS!current_date = datetime.date(day=int(datestring[0:2]),month=int(datestring[2:4]),year=2000+int(datestring[4:6]))
 
-    month = previous_date.strftime('%m')
-    month_words = previous_date.strftime('%b')
-    year = previous_date.strftime('%Y')
-    file_date = previous_date.strftime("%Y%m%d")
+    month = current_date.strftime('%m')
+    month_words = current_date.strftime('%b')
+    year = current_date.strftime('%Y')
+    file_date = current_date.strftime("%Y%m%d")
 
     # Load config file from ihlconfig.json which contains details of the IHLs.
-    config = json.load(open('./ihlconfig.json'))
+    config = json.load(open(ihl_config_file_path))
 
     # Load Server name and IP Address for the Euro Top-Level RADIUS Servers
     etlr_server = config['etlr']['server']
@@ -226,6 +225,7 @@ def main():
     with open("./logs/radsecproxy.log-{}".format(file_date), "r") as log_data:
         log_extract(log_data, ihl_array, etlr_server, etlr_ip)
 
+
     # 3. Writing back to uniqueUserFiles
     for institution in ihl_array:
         ihl_array[institution].write_unique_user_files(month, year)
@@ -235,12 +235,7 @@ def main():
     results(ihl_array, "Stats_results/results.log_{}".format(file_date))
 
     # 5. Save to CSV files(Daily, Monthly, Yearly) - saveCSV(FileInterval) Code logic at line 106
-    save_csv(ihl_array, 'csv/Daily{}{}'.format(month_words, year), 'Day', previous_date)
-    save_csv(ihl_array, 'csv/Monthly{}'.format(year), 'Month', previous_date)
-    save_csv(ihl_array, 'csv/Yearly', 'Year', previous_date)
+    save_csv(ihl_array, 'csv/Daily{}{}'.format(month_words, year), 'Day', current_date)
+    save_csv(ihl_array, 'csv/Monthly{}'.format(year), 'Month', current_date)
+    save_csv(ihl_array, 'csv/Yearly', 'Year', current_date)
     print("Saved to CSV files!")
-
-
-""" Allows execution of main convert function if run as a script"""    
-if __name__ == '__main__':
-    main()
