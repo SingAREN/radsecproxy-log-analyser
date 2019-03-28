@@ -1,6 +1,9 @@
 import argparse
 import datetime
-from lib import users_and_institutions, server_load
+from lib import institution_utilisation, server_load
+from lib import server_load_html_generator
+
+HTML_FILE_PATH = 'html files'
 
 
 def valid_date(date_input):
@@ -22,11 +25,11 @@ def main(start_date, end_date):
     while current_date <= end_date:
         try:
             server_load.analysis(current_date)
-            users_and_institutions.analysis(current_date)
+            institution_utilisation.analysis(current_date)
         except FileNotFoundError as error:
             print(error)
-
         current_date += datetime.timedelta(1)
+    server_load_html_generator.render_web_page(HTML_FILE_PATH, end_date)
 
 
 """ Allows execution of main convert function if run as a script"""
