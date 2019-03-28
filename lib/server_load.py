@@ -1,7 +1,6 @@
 import datetime
 import csv
 import os
-import argparse
 
 
 class ServerLoad:
@@ -46,7 +45,6 @@ class ServerLoad:
             # Filter away the entries where the first element is the current date
             csv_list = [row for row in csv_list if csv_date not in row and row != []]
             print("Filtered!")
-            print(self.accepts)
 
         for hour, count in enumerate(self.accepts):
             csv_list.append([csv_date, month_words, datetime.time(hour=hour).strftime("%X"), count, "Accepted"])
@@ -81,69 +79,24 @@ class ServerLoad:
                 self.update_hour_array(self.accepts, time)
 
 
-def server_load_analyser(start_date, end_date):
+def analysis(current_date):
     """ Testing full program. Check and set the day for specific date"""
-    ## Since datetime is a built-in module, can just use its properties to get previous day's date.
-    # Comment below when you use batchfile sys.argv
-    current_date = start_date
-    while current_date <= end_date:
-        year = current_date.strftime('%Y')
-        file_date = current_date.strftime("%Y%m%d")
-        # Comment below when using batchfile, check the filepath before running- IMPORTANT!
-        # 1.Initialise serverLoad for checking number of authentication requests
-        total = ServerLoad()
-        # 2.Do Log Extract
-        print("Opening radsecproxy.log-{}".format(file_date))
-        try:
-            with open("./logs/radsecproxy.log-{}".format(file_date), "r") as log_data:
-                total.log_extract(log_data)
-        except FileNotFoundError as error:
-            print(error)
-            current_date += datetime.timedelta(1)
-            continue
+    year = current_date.strftime('%Y')
+    file_date = current_date.strftime("%Y%m%d")
+    # Comment below when using batchfile, check the filepath before running- IMPORTANT!
+    # 1.Initialise serverLoad for checking number of authentication requests
+    total = ServerLoad()
+    # 2.Do Log Extract
+    print("Opening radsecproxy.log-{}".format(file_date))
 
-        print("Number of accepted requests by hour: {}".format(total.accepts))
-        print("Number of rejected requests by hour: {}".format(total.rejects))
-        print("Total number of accepted requests: {}".format(sum(total.accepts)))
-        print("Total number of rejected requests: {}".format(sum(total.rejects)))
+    with open("./logs/radsecproxy.log-{}".format(file_date), "r") as log_data:
+        total.log_extract(log_data)
 
-        # 3. Save to CSV files
-        total.save_csv("csv/ServerLoad{}".format(year), current_date)
-        print("Saved to CSV!")
-        current_date += datetime.timedelta(1)
+    print("Number of accepted requests by hour: {}".format(total.accepts))
+    print("Number of rejected requests by hour: {}".format(total.rejects))
+    print("Total number of accepted requests: {}".format(sum(total.accepts)))
+    print("Total number of rejected requests: {}".format(sum(total.rejects)))
 
-
-def valid_date(date_input):
-    try:
-        return datetime.datetime.strptime(str(date_input), '%Y%m%d').date()
-    except ValueError:
-        print('Ignoring input as \'{}\' is not a valid date.'.format(date_input))
-        return None
-
-
-""" Allows execution of main convert function if run as a script"""    
-if __name__ == '__main__':
-    default_date = datetime.date.today() - datetime.timedelta(1)
-    start = default_date
-    end = default_date
-
-    parser = argparse.ArgumentParser(prog='radsecproxy Server Load Analyser')
-    parser.add_argument('--start_date', '-s', help='Start date in %Y%m%d format, e.g. 20190204', type=valid_date)
-    parser.add_argument('--end_date', '-e', help='End date in %Y%m%d format, e.g. 20190228. '
-                                                 'Use with --start_date flag.', type=valid_date)
-    arguments = parser.parse_args()
-
-    if arguments.start_date:
-        start = arguments.start_date
-    # Sets end date if valid date exists from parsed arguments and if said date is not in the future.
-    if arguments.end_date:
-        if not arguments.start_date:
-            print('No start date provided... Setting end date as default date: {}'.format(default_date))
-            end = default_date
-        if arguments.end_date < default_date:
-            end = arguments.end_date
-
-    if start > end:
-        raise ValueError('Start date is ahead of end date')
-
-    server_load_analyser(start, end)
+    # 3. Save to CSV files
+    total.save_csv("csv/ServerLoad{}".format(year), current_date)
+    print("Saved to CSV!")
