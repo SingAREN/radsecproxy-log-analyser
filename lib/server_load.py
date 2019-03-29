@@ -79,7 +79,7 @@ class ServerLoad:
                 self.update_hour_array(self.accepts, time)
 
 
-def analysis(csv_file_path, current_date):
+def analysis(csv_directory, current_date):
     """ Testing full program. Check and set the day for specific date"""
     year = current_date.strftime('%Y')
     file_date = current_date.strftime("%Y%m%d")
@@ -98,6 +98,6 @@ def analysis(csv_file_path, current_date):
     print("Total number of rejected requests: {}".format(sum(total.rejects)))
 
     # 3. Save to CSV files
-    csv_file = os.path.join(csv_file_path, 'ServerLoad{}.csv'.format(year))
+    csv_file = os.path.join(csv_directory, 'ServerLoad{}.csv'.format(year))
     total.save_csv(csv_file, current_date)
     print("Saved to CSV!")

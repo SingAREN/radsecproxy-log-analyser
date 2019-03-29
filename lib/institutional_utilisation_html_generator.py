@@ -195,12 +195,12 @@ def ihl_utilisation_web_page_template(ihl_name, month, year, first_date, last_da
 	return header+dailychart+monthlychart+yearlychart+"</body></html>"
 
 
-def render_web_page(file_path, ihl_config_file_path, current_date):
+def render_web_page(file_directory, ihl_config_file_path, current_date):
 	"""
 	Writing to html files for each IHL.
 	Check all the IHL's names and the filepath
 	Load config file from ihlconfig.json which contains details of the IHLs.
-	:param file_path:
+	:param file_directory:
 	:param ihl_config_file_path:
 	:param current_date: datetime.date
 	:return:
@@ -219,6 +219,6 @@ def render_web_page(file_path, ihl_config_file_path, current_date):
 
 	for ihl_name in ihl_names:
 		ihl_name_lower_case = ihl_name.lower()
-		with open(os.path.join(file_path, '{}.html'.format(ihl_name_lower_case)), 'w') as html_out:
+		with open(os.path.join(file_directory, '{}.html'.format(ihl_name_lower_case)), 'w') as html_out:
 			html_out.write(ihl_utilisation_web_page_template(ihl_name, month_words, year, first_date, last_date))
 	print("Finished writing html files for all IHLs!")

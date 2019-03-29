@@ -3,8 +3,9 @@ import datetime
 from lib import institution_utilisation, server_load
 from lib import server_load_html_generator, institutional_utilisation_html_generator
 
-HTML_FILE_PATH = 'html'
-CSV_FILE_PATH = HTML_FILE_PATH
+HTML_DIRECTORY = 'html'
+CSV_DIRECTORY = HTML_DIRECTORY
+STATISTICS_DIRECTORY = 'statistics'
 IHL_CONFIG_FILE = 'ihlconfig.json'
 
 
@@ -29,13 +30,13 @@ def main(start_date, end_date):
     current_date = start_date
     while current_date <= end_date:
         try:
-            server_load.analysis(CSV_FILE_PATH, current_date)
-            institution_utilisation.analysis(CSV_FILE_PATH, IHL_CONFIG_FILE, current_date)
+            server_load.analysis(CSV_DIRECTORY, current_date)
+            institution_utilisation.analysis(STATISTICS_DIRECTORY, CSV_DIRECTORY, IHL_CONFIG_FILE, current_date)
         except FileNotFoundError as error:
             print(error)
         current_date += datetime.timedelta(1)
-    server_load_html_generator.render_web_page(HTML_FILE_PATH, end_date)
-    institutional_utilisation_html_generator.render_web_page(HTML_FILE_PATH, IHL_CONFIG_FILE, end_date)
+    server_load_html_generator.render_web_page(HTML_DIRECTORY, end_date)
+    institutional_utilisation_html_generator.render_web_page(HTML_DIRECTORY, IHL_CONFIG_FILE, end_date)
 
 
 """ Allows execution of main convert function if run as a script"""

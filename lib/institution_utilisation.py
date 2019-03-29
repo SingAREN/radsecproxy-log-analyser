@@ -80,9 +80,9 @@ def log_extract(log_data, ihl_array, euro_tlr_server, euro_tlr_ip):
         print("{}: {}".format(ihl_array[ihl].name, ihl_array[ihl].localUsersCount))
 
 
-def results(ihl_array, filename):
+def results(ihl_array, file_name):
     """ Keep the results in a daily log file with date attached to it. """
-    result = open(filename, "w")
+    result = open(file_name, "w")
     print("Writing to Results.txt")
     # ihl_name_list: List of institutes of higher learning (IHL) in the within the logs
 
@@ -173,7 +173,7 @@ def save_csv(ihl_array, file_name, interval, previous_date):
             writer.writerows(csv_list)
 
 
-def analysis(csv_file_path, ihl_config_file_path, current_date):
+def analysis(statistics_directory, csv_directory, ihl_config_file_path, current_date):
     """
     Defines the main conversion process. Instantiates the class IHL for each institute
     nd calls the other functions for processing.
@@ -221,12 +221,12 @@ def analysis(csv_file_path, ihl_config_file_path, current_date):
     print("Finished writing to each uniqueUser file for all the IHLs")
     
     # 4. Write to results file - Code logic at line 80
-    results(ihl_array, "Stats_results/results.log_{}".format(file_date))
+    results(ihl_array, os.path.join(statistics_directory, 'results.log_{}'.format(file_date)))
 
     # 5. Save to CSV files(Daily, Monthly, Yearly) - saveCSV(FileInterval) Code logic at line 106
-    daily_csv = os.path.join(csv_file_path, 'Daily{}{}.csv'.format(month_words, year))
-    monthly_csv = os.path.join(csv_file_path, 'Monthly{}.csv'.format(year))
-    yearly_csv = os.path.join(csv_file_path, 'Yearly.csv')
+    daily_csv = os.path.join(csv_directory, 'Daily{}{}.csv'.format(month_words, year))
+    monthly_csv = os.path.join(csv_directory, 'Monthly{}.csv'.format(year))
+    yearly_csv = os.path.join(csv_directory, 'Yearly.csv')
 
     save_csv(ihl_array, daily_csv, 'Day', current_date)
     save_csv(ihl_array, monthly_csv, 'Month', current_date)

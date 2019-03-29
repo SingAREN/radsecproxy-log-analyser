@@ -171,9 +171,9 @@ def server_load_web_page_template(current_date):
     return header+hourly_chart+daily_chart+monthly_chart+"</body></html>"
 
 
-def render_web_page(file_path, current_date):
+def render_web_page(file_directory, current_date):
 
-    with open(os.path.join(file_path, 'total.html'), 'w') as html_out:
+    with open(os.path.join(file_directory, 'total.html'), 'w') as html_out:
         html_out.write(server_load_web_page_template(current_date))
     print("Total eduroam stats html file written!")
 
