@@ -3,7 +3,8 @@ import datetime
 from lib import institution_utilisation, server_load
 from lib import server_load_html_generator, institutional_utilisation_html_generator
 
-HTML_FILE_PATH = 'html files'
+HTML_FILE_PATH = 'html'
+CSV_FILE_PATH = HTML_FILE_PATH
 IHL_CONFIG_FILE = 'ihlconfig.json'
 
 
@@ -28,8 +29,8 @@ def main(start_date, end_date):
     current_date = start_date
     while current_date <= end_date:
         try:
-            server_load.analysis(current_date)
-            institution_utilisation.analysis(IHL_CONFIG_FILE, current_date)
+            server_load.analysis(CSV_FILE_PATH, current_date)
+            institution_utilisation.analysis(CSV_FILE_PATH, IHL_CONFIG_FILE, current_date)
         except FileNotFoundError as error:
             print(error)
         current_date += datetime.timedelta(1)
@@ -61,5 +62,4 @@ if __name__ == '__main__':
 
     if start > end:
         raise ValueError('Start date is ahead of end date')
-
     main(start, end)

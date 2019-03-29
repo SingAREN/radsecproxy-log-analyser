@@ -20,22 +20,22 @@ class ServerLoad:
         except ValueError:
             print('Malformed log line. Skipping...')
 
-    def save_csv(self, filename, date):
+    def save_csv(self, file_path, date):
         """Save the extracted data into a separate CSV file logging number of requests hourly"""
         csv_list = []
         month_words = date.strftime('%b')
         csv_date = date.strftime('%d%b%y')
 
-        if os.path.isfile(filename+'.csv') and os.path.getsize(filename+'.csv') > 0:
-        # Check if file is non-zero and exists, then open to get csv_list
-            with open(filename+'.csv', 'r') as csv_file:
+        if os.path.isfile(file_path) and os.path.getsize(file_path) > 0:
+            # Check if file is non-zero and exists, then open to get csv_list
+            with open(file_path, 'r') as csv_file:
                 reader = csv.reader(csv_file)
-                print("Reading the {}.csv file".format(filename))
+                print("Reading {} file".format(file_path))
                 for row in reader:
                     csv_list.append(row)
         else:
-            with open(filename+'.csv', 'w') as csv_file:
-                print("Creating new {}.csv file" .format(filename))
+            with open(file_path, 'w') as csv_file:
+                print("Creating new {} file" .format(file_path))
             csv_row = ["Date", "Month", "Hour", "Requests", "Category"]
             csv_list.append(csv_row)
         csv_list = [row for row in csv_list if row != []]
@@ -53,7 +53,7 @@ class ServerLoad:
             csv_list.append([csv_date, month_words, datetime.time(hour=hour).strftime("%X"), count, "Rejected"])
 
         # Then write back to csv file
-        with open(filename+'.csv', 'w') as csv_file:
+        with open(file_path, 'w') as csv_file:
             writer = csv.writer(csv_file)
             writer.writerows(csv_list)
         print("Saved to Request Log CSV!")
@@ -79,7 +79,7 @@ class ServerLoad:
                 self.update_hour_array(self.accepts, time)
 
 
-def analysis(current_date):
+def analysis(csv_file_path, current_date):
     """ Testing full program. Check and set the day for specific date"""
     year = current_date.strftime('%Y')
     file_date = current_date.strftime("%Y%m%d")
@@ -98,5 +98,6 @@ def analysis(current_date):
     print("Total number of rejected requests: {}".format(sum(total.rejects)))
 
     # 3. Save to CSV files
-    total.save_csv("csv/ServerLoad{}".format(year), current_date)
+    csv_file = os.path.join(csv_file_path, 'ServerLoad{}.csv'.format(year))
+    total.save_csv(csv_file, current_date)
     print("Saved to CSV!")

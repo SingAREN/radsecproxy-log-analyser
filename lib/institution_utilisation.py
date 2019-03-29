@@ -111,7 +111,7 @@ def is_non_zero_file(fpath):
     return True if os.path.isfile(fpath) and os.path.getsize(fpath) > 0 else False
 
 
-def save_csv(ihl_array, filename, interval, previous_date):
+def save_csv(ihl_array, file_name, interval, previous_date):
         """Save the extracted data into daily, monthly and yearly CSV files for data visualisation"""
         csv_list = []
         day = previous_date.strftime('%d')
@@ -119,16 +119,16 @@ def save_csv(ihl_array, filename, interval, previous_date):
         year = previous_date.strftime('%Y')
         year_2numbers = previous_date.strftime('%y')
 
-        if is_non_zero_file(filename+'.csv'):
+        if is_non_zero_file(file_name):
             # Open the file first and get csv_list
-            with open(filename+'.csv', 'r') as csv_file:
+            with open(file_name, 'r') as csv_file:
                 reader = csv.reader(csv_file)
-                print("Reading the "+filename+".csv file")
+                print('Reading {} file'.format(file_name))
                 for row in reader:
                     csv_list.append(row)
         else:
-            with open(filename+'.csv', 'w') as csv_file:
-                print("Creating new {}.csv file".format(filename))
+            with open(file_name, 'w') as csv_file:
+                print("Creating new {} file".format(file_name))
             csv_row = []
             if interval == 'Day':
                 csv_row = ["Date", "IHL", "Users", "Category"]
@@ -150,7 +150,7 @@ def save_csv(ihl_array, filename, interval, previous_date):
                 csv_list.append([date, ihl_array[ihl].name, ihl_array[ihl].get_reject_count(), "Rejected"])
         if interval == 'Month':
             # Check for duplicate month entry and delete
-            if not(month_words != last_checked and last_checked=='Month'):
+            if not(month_words != last_checked and last_checked == 'Month'):
                 # Filter away the entries where the first element is the current month
                 csv_list = [row for row in csv_list if month_words not in row]
             for ihl in ihl_array:
@@ -168,27 +168,17 @@ def save_csv(ihl_array, filename, interval, previous_date):
                 csv_list.append([year, ihl_array[ihl].name, ihl_array[ihl].get_reject_unique_count_year(), "Rejected"])
         csv_list = [row for row in csv_list if row != []]
         # Then write back to csv file
-        with open(filename+'.csv', 'w') as csv_file:
+        with open(file_name, 'w') as csv_file:
             writer = csv.writer(csv_file)
             writer.writerows(csv_list)
 
 
-def analysis(ihl_config_file_path, current_date):
+def analysis(csv_file_path, ihl_config_file_path, current_date):
     """
     Defines the main conversion process. Instantiates the class IHL for each institute
     nd calls the other functions for processing.
     :return:
     """
-    # Since datetime is a built-in module, can just use its properties to get previous day's date.
-    # Comment the current_date below when you use batchfile sys.argv
-    #current_date = datetime.date.today() - datetime.timedelta(1)
-    #current_date = datetime.date(day=3, month=2, year=2019)
-    
-    # uncomment !SS! below for use with batchfile only. Example arg: 021215 ###
-    # !SS!log_file = open("/home/eduroam_stat/old-stat/radsecproxy.log_"+str(sys.argv[1]),"r")
-    # !SS!print ("radsecproxy.log_"+str(sys.argv[1]))
-    # !SS!datestring=str(sys.argv[1])
-    # !SS!current_date = datetime.date(day=int(datestring[0:2]),month=int(datestring[2:4]),year=2000+int(datestring[4:6]))
 
     month = current_date.strftime('%m')
     month_words = current_date.strftime('%b')
@@ -225,7 +215,6 @@ def analysis(ihl_config_file_path, current_date):
     with open("./logs/radsecproxy.log-{}".format(file_date), "r") as log_data:
         log_extract(log_data, ihl_array, etlr_server, etlr_ip)
 
-
     # 3. Writing back to uniqueUserFiles
     for institution in ihl_array:
         ihl_array[institution].write_unique_user_files(month, year)
@@ -235,7 +224,11 @@ def analysis(ihl_config_file_path, current_date):
     results(ihl_array, "Stats_results/results.log_{}".format(file_date))
 
     # 5. Save to CSV files(Daily, Monthly, Yearly) - saveCSV(FileInterval) Code logic at line 106
-    save_csv(ihl_array, 'csv/Daily{}{}'.format(month_words, year), 'Day', current_date)
-    save_csv(ihl_array, 'csv/Monthly{}'.format(year), 'Month', current_date)
-    save_csv(ihl_array, 'csv/Yearly', 'Year', current_date)
+    daily_csv = os.path.join(csv_file_path, 'Daily{}{}.csv'.format(month_words, year))
+    monthly_csv = os.path.join(csv_file_path, 'Monthly{}.csv'.format(year))
+    yearly_csv = os.path.join(csv_file_path, 'Yearly.csv')
+
+    save_csv(ihl_array, daily_csv, 'Day', current_date)
+    save_csv(ihl_array, monthly_csv, 'Month', current_date)
+    save_csv(ihl_array, yearly_csv, 'Year', current_date)
     print("Saved to CSV files!")
